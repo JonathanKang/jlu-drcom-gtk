@@ -19,6 +19,8 @@
 #include <gtk/gtk.h>
 #include <glib-object.h>
 
+#include "drcom.h"
+
 int
 main (int argc, char *argv[])
 {
@@ -31,6 +33,7 @@ main (int argc, char *argv[])
     GtkWidget *login_button;
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
+    GPtrArray *buffer_array;
 
     gtk_init (&argc, &argv);
 
@@ -50,6 +53,10 @@ main (int argc, char *argv[])
                                  GTK_INPUT_PURPOSE_PASSWORD);
     gtk_entry_set_visibility (GTK_ENTRY (password_entry), FALSE);
 
+    buffer_array = g_ptr_array_new ();
+    g_ptr_array_add (buffer_array, (gpointer) username_buffer);
+    g_ptr_array_add (buffer_array, (gpointer) password_buffer);
+
     login_button = gtk_button_new_with_label ("Login");
 
     grid = gtk_grid_new ();
@@ -66,6 +73,8 @@ main (int argc, char *argv[])
     gtk_widget_show_all (window);
 
     g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
+    g_signal_connect (login_button, "clicked",
+                      G_CALLBACK (on_login), buffer_array);
 
     gtk_main ();
 

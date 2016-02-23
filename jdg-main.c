@@ -73,6 +73,8 @@ main (int argc, char *argv[])
     gtk_widget_show_all (window);
 
     g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
+    g_signal_connect (password_entry, "activate",
+                      G_CALLBACK (on_login), buffer_array);
     g_signal_connect (login_button, "clicked",
                       G_CALLBACK (on_login), buffer_array);
 

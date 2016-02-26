@@ -21,6 +21,32 @@
 
 #include "drcom.h"
 
+static void
+on_check_button_toggled (GtkWidget *check_button,
+                         gpointer user_data)
+{
+    GKeyFile *key_file;
+
+    key_file = g_key_file_new ();
+    g_key_file_load_from_file (key_file, "jdg.ini",
+                               G_KEY_FILE_NONE, NULL);
+
+    if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button)))
+    {
+        g_key_file_set_boolean (key_file,
+                                "config", "remember_password", TRUE);
+    }
+    else
+    {
+        g_key_file_set_boolean (key_file,
+                                "config", "remember_password", FALSE);
+    }
+
+    g_key_file_save_to_file (key_file, "jdg.ini", NULL);
+
+    g_key_file_free (key_file);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -30,10 +56,12 @@ main (int argc, char *argv[])
     GtkWidget *password_label;
     GtkWidget *username_entry;
     GtkWidget *password_entry;
+    GtkWidget *check_button;
     GtkWidget *login_button;
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
     GPtrArray *buffer_array;
+    GKeyFile *key_file;
 
     gtk_init (&argc, &argv);
 
@@ -57,7 +85,21 @@ main (int argc, char *argv[])
     g_ptr_array_add (buffer_array, (gpointer) username_buffer);
     g_ptr_array_add (buffer_array, (gpointer) password_buffer);
 
+    check_button = gtk_check_button_new_with_label ("Remember Password");
     login_button = gtk_button_new_with_label ("Login");
+
+    key_file = g_key_file_new ();
+    g_key_file_load_from_file (key_file, "jdg.ini",
+                               G_KEY_FILE_NONE, NULL);
+    if (g_key_file_get_boolean (key_file, "config", "remember_password", NULL))
+    {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button), TRUE);
+    }
+    else
+    {
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button), FALSE);
+    }
+    g_key_file_free (key_file);
 
     grid = gtk_grid_new ();
     gtk_grid_set_row_spacing (GTK_GRID (grid), 5);
@@ -67,14 +109,18 @@ main (int argc, char *argv[])
     gtk_grid_attach (GTK_GRID (grid), password_label, 0, 1, 1, 1);
     gtk_grid_attach (GTK_GRID (grid), username_entry, 1, 0, 1, 1);
     gtk_grid_attach (GTK_GRID (grid), password_entry, 1, 1, 1, 1);
+    gtk_grid_attach (GTK_GRID (grid), check_button, 0, 2, 1, 1);
     gtk_grid_attach (GTK_GRID (grid), login_button, 1, 2, 1, 1);
 
     gtk_container_add (GTK_CONTAINER (window), grid);
     gtk_widget_show_all (window);
 
+    /* Signals */
     g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
     g_signal_connect (password_entry, "activate",
                       G_CALLBACK (on_login), buffer_array);
+    g_signal_connect (check_button, "toggled",
+                      G_CALLBACK (on_check_button_toggled), NULL);
     g_signal_connect (login_button, "clicked",
                       G_CALLBACK (on_login), buffer_array);
 

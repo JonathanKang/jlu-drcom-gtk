@@ -50,6 +50,7 @@ on_check_button_toggled (GtkWidget *check_button,
 int
 main (int argc, char *argv[])
 {
+    GdkPixbuf *icon;
     GtkWidget *window;
     GtkWidget *grid;
     GtkWidget *username_label;
@@ -69,6 +70,9 @@ main (int argc, char *argv[])
     gtk_window_set_title (GTK_WINDOW (window), "jlu-drcom-gtk");
     gtk_window_set_default_size (GTK_WINDOW (window), 600, 200);
     gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
+
+    icon = gdk_pixbuf_new_from_file ("jdg.png", NULL);
+    gtk_window_set_icon (GTK_WINDOW (window), icon);
 
     username_label = gtk_label_new ("Username");
     password_label = gtk_label_new ("Password");
@@ -123,6 +127,8 @@ main (int argc, char *argv[])
                       G_CALLBACK (on_check_button_toggled), NULL);
     g_signal_connect (login_button, "clicked",
                       G_CALLBACK (on_login), buffer_array);
+
+    g_object_unref (icon);
 
     gtk_main ();
 

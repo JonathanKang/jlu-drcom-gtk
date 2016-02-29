@@ -78,9 +78,10 @@ struct user_info_pkt {
 /* signal process flag */
 int logout_flag = 0;
 
-void get_user_info(struct user_info_pkt *user_info,
-                   const char *username,
-                   const char *password)
+void
+get_user_info (struct user_info_pkt *user_info,
+               const char *username,
+               const char *password)
 {
 	user_info->username = username;
 	user_info->username_len = sizeof (username) - 1;
@@ -93,7 +94,10 @@ void get_user_info(struct user_info_pkt *user_info,
 	user_info->mac_addr = mac;
 }
 
-void set_challenge_data(unsigned char *clg_data, int clg_data_len, int clg_try_count)
+void
+set_challenge_data (unsigned char *clg_data,
+                    int clg_data_len,
+                    int clg_try_count)
 {
 	/* set challenge */
 	int random = rand() % 0xF0 + 0xF;
@@ -110,7 +114,13 @@ void set_challenge_data(unsigned char *clg_data, int clg_data_len, int clg_try_c
 	clg_data[data_index++] = 0x09;
 }
 
-void challenge(int sock, struct sockaddr_in serv_addr, unsigned char *clg_data, int clg_data_len, char *recv_data, int recv_len)
+void
+challenge (int sock,
+           struct sockaddr_in serv_addr,
+           unsigned char *clg_data,
+           int clg_data_len,
+           char *recv_data,
+           int recv_len)
 {
 	int ret;
 	int challenge_try = 0;
@@ -144,7 +154,12 @@ void challenge(int sock, struct sockaddr_in serv_addr, unsigned char *clg_data, 
 	fprintf(stdout, "[drcom-challenge]: challenge success!\n");
 }
 
-void set_login_data(struct user_info_pkt *user_info, unsigned char *login_data, int login_data_len, unsigned char *salt, int salt_len)
+void
+set_login_data (struct user_info_pkt *user_info,
+                unsigned char *login_data,
+                int login_data_len,
+                unsigned char *salt,
+                int salt_len)
 {
 	/* login data */
 	int i, j;
@@ -302,7 +317,13 @@ void set_login_data(struct user_info_pkt *user_info, unsigned char *login_data, 
 	}
 }
 
-void login(int sock, struct sockaddr_in serv_addr, unsigned char *login_data, int login_data_len, char *recv_data, int recv_len)
+void
+login (int sock,
+       struct sockaddr_in serv_addr,
+       unsigned char *login_data,
+       int login_data_len,
+       char *recv_data,
+       int recv_len)
 {
 	/* login */
 	int ret = 0;
@@ -336,7 +357,13 @@ void login(int sock, struct sockaddr_in serv_addr, unsigned char *login_data, in
 	fprintf(stdout, "[drcom-login]: login success!\n");
 }
 
-void set_alive_data(unsigned char *alive_data, int alive_data_len, unsigned char *tail, int tail_len, int alive_count, int random)
+void
+set_alive_data (unsigned char *alive_data,
+                int alive_data_len,
+                unsigned char *tail,
+                int tail_len,
+                int alive_count,
+                int random)
 {
 	// 0: 84 | 1: 82 | 2: 82
 	int i = 0;
@@ -367,14 +394,22 @@ void set_alive_data(unsigned char *alive_data, int alive_data_len, unsigned char
 //	}
 }
 
-void set_logout_data(unsigned char *logout_data, int logout_data_len)
+void
+set_logout_data (unsigned char *logout_data,
+                 int logout_data_len)
 {
 	memset(logout_data, 0x00, logout_data_len);
 	// TODO
 
 }
 
-void logout(int sock, struct sockaddr_in serv_addr, unsigned char *logout_data, int logout_data_len, char *recv_data, int recv_len)
+void
+logout (int sock,
+        struct sockaddr_in serv_addr,
+        unsigned char *logout_data,
+        int logout_data_len,
+        char *recv_data,
+        int recv_len)
 {
 	set_logout_data(logout_data, logout_data_len);
 	// TODO
@@ -392,9 +427,6 @@ void
 on_login (GtkButton *button,
           gpointer user_data)
 {
-
-
-//int main(int argc, char **argv)
 	int sock, ret;
 	unsigned char send_data[SEND_DATA_SIZE];
 	char recv_data[RECV_DATA_SIZE];

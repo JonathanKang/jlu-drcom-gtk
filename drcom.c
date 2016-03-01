@@ -434,19 +434,64 @@ on_login (GtkButton *button,
 	struct user_info_pkt user_info;
     const char *username;
     const char *password;
+    GKeyFile *key_file;
     GPtrArray *buffer_array;
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
+    GtkWidget *check_button;
 
     buffer_array = (GPtrArray *) user_data;
     username_buffer = g_ptr_array_index (buffer_array, 0);
     password_buffer = g_ptr_array_index (buffer_array, 1);
+    check_button = g_ptr_array_index (buffer_array, 2);
 
     /* get username and password from entry buffers */
     username = gtk_entry_buffer_get_text (username_buffer);
     password = gtk_entry_buffer_get_text (password_buffer);
 
     g_ptr_array_free (buffer_array, FALSE);
+
+    key_file = g_key_file_new ();
+    g_key_file_load_from_file (key_file, "jdg.ini",
+                               G_KEY_FILE_NONE, NULL);
+
+    if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button)))
+    {
+        if (g_key_file_has_key (key_file, "config", "username", NULL))
+        {
+            gchar *str_un;
+
+            str_un = g_key_file_get_string (key_file,
+                                            "config", "username", NULL);
+
+            if (g_strcmp0 (username, str_un) != 0)
+            {
+                g_key_file_set_string (key_file,
+                                       "config", "username", username);
+                g_key_file_set_string (key_file,
+                                       "config", "password", password);
+            }
+
+            g_free (str_un);
+        }
+        else
+        {
+            g_key_file_set_string (key_file, "config", "username", username);
+            g_key_file_set_string (key_file, "config", "password", password);
+        }
+    }
+    else
+    {
+        if (g_key_file_has_key (key_file, "config", "username", NULL))
+        {
+            g_key_file_remove_key (key_file, "config", "username", NULL);
+            g_key_file_remove_key (key_file, "config", "password", NULL);
+        }
+    }
+
+    g_key_file_save_to_file (key_file, "jdg.ini", NULL);
+
+    g_key_file_free (key_file);
 
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sock < 0) {

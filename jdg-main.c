@@ -85,19 +85,37 @@ main (int argc, char *argv[])
                                  GTK_INPUT_PURPOSE_PASSWORD);
     gtk_entry_set_visibility (GTK_ENTRY (password_entry), FALSE);
 
+    check_button = gtk_check_button_new_with_label ("Remember Password");
+    login_button = gtk_button_new_with_label ("Login");
+
     buffer_array = g_ptr_array_new ();
     g_ptr_array_add (buffer_array, (gpointer) username_buffer);
     g_ptr_array_add (buffer_array, (gpointer) password_buffer);
-
-    check_button = gtk_check_button_new_with_label ("Remember Password");
-    login_button = gtk_button_new_with_label ("Login");
+    g_ptr_array_add (buffer_array, (gpointer) check_button);
 
     key_file = g_key_file_new ();
     g_key_file_load_from_file (key_file, "jdg.ini",
                                G_KEY_FILE_NONE, NULL);
     if (g_key_file_get_boolean (key_file, "config", "remember_password", NULL))
     {
+        gchar *username;
+        gchar *password;
+
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button), TRUE);
+
+        username = g_key_file_get_string (key_file,
+                                          "config", "username", NULL);
+        password = g_key_file_get_string (key_file,
+                                          "config", "password", NULL);
+
+        if (username != NULL && password != NULL)
+        {
+            gtk_entry_buffer_set_text (username_buffer, username, -1);
+            gtk_entry_buffer_set_text (password_buffer, password, -1);
+        }
+
+        g_free (username);
+        g_free (password);
     }
     else
     {

@@ -19,8 +19,6 @@
 #ifndef DRCOM_H_
 #define DRCOM_H_
 
-#include <glib.h>
-
-void on_login (GtkButton *button, gpointer user_data);
+void on_login (const char *username, const char *password);
 
 #endif /* DRCOM_H_ */

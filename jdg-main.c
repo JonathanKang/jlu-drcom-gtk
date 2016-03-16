@@ -120,6 +120,7 @@ main (int argc, char *argv[])
 {
     GdkPixbuf *icon;
     GtkWidget *window;
+    GtkWidget *main_box;
     GtkWidget *grid;
     GtkWidget *username_label;
     GtkWidget *password_label;
@@ -202,7 +203,13 @@ main (int argc, char *argv[])
     gtk_grid_attach (GTK_GRID (grid), check_button, 0, 2, 1, 1);
     gtk_grid_attach (GTK_GRID (grid), login_button, 1, 2, 1, 1);
 
-    gtk_container_add (GTK_CONTAINER (window), grid);
+    main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_margin_start (main_box, 5);
+    gtk_widget_set_margin_end (main_box, 5);
+    gtk_box_pack_start (GTK_BOX (main_box), grid,
+                        TRUE, TRUE, 5);
+
+    gtk_container_add (GTK_CONTAINER (window), main_box);
     gtk_widget_show_all (window);
 
     /* Signals */

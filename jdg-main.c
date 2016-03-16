@@ -58,7 +58,9 @@ on_login_button_clicked (GtkWidget *button,
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
     GtkWidget *check_button;
+    GtkWidget *logout_button;
     GtkWidget *revealer;
+    GtkWidget *stack;
     GtkWidget *text_view;
     GtkTextBuffer *text_buffer;
 
@@ -67,6 +69,7 @@ on_login_button_clicked (GtkWidget *button,
     password_buffer = g_ptr_array_index (buffer_array, 1);
     check_button = g_ptr_array_index (buffer_array, 2);
     revealer = g_ptr_array_index (buffer_array, 3);
+    stack = g_ptr_array_index (buffer_array, 4);
 
     /* GtkTextView to show output information */
     text_view = gtk_text_view_new ();
@@ -79,6 +82,13 @@ on_login_button_clicked (GtkWidget *button,
     gtk_container_add (GTK_CONTAINER (revealer), text_view);
     gtk_widget_show (revealer);
     gtk_revealer_set_reveal_child (GTK_REVEALER (revealer), TRUE);
+
+    logout_button = gtk_button_new_with_label ("logout");
+    gtk_widget_set_halign (logout_button, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (logout_button, GTK_ALIGN_CENTER);
+    gtk_widget_set_visible (logout_button, TRUE);
+    gtk_stack_add_named (GTK_STACK (stack), logout_button, "info");
+    gtk_stack_set_visible_child_name (GTK_STACK (stack), "info");
 
     /* get username and password from entry buffers */
     username = gtk_entry_buffer_get_text (username_buffer);
@@ -128,7 +138,7 @@ on_login_button_clicked (GtkWidget *button,
 
     g_key_file_free (key_file);
 
-    on_login (username, password);
+    //on_login (username, password);
 }
 
 int
@@ -145,6 +155,7 @@ main (int argc, char *argv[])
     GtkWidget *check_button;
     GtkWidget *login_button;
     GtkWidget *revealer;
+    GtkWidget *stack;
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
     GPtrArray *buffer_array;
@@ -177,11 +188,15 @@ main (int argc, char *argv[])
     revealer = gtk_revealer_new ();
     gtk_widget_hide (revealer);
 
+    /* Stack to switch between login page and info page */
+    stack = gtk_stack_new ();
+
     buffer_array = g_ptr_array_new ();
     g_ptr_array_add (buffer_array, (gpointer) username_buffer);
     g_ptr_array_add (buffer_array, (gpointer) password_buffer);
     g_ptr_array_add (buffer_array, (gpointer) check_button);
     g_ptr_array_add (buffer_array, (gpointer) revealer);
+    g_ptr_array_add (buffer_array, (gpointer) stack);
 
     key_file = g_key_file_new ();
     g_key_file_load_from_file (key_file, "jdg.ini",
@@ -213,6 +228,7 @@ main (int argc, char *argv[])
     }
     g_key_file_free (key_file);
 
+    /* Login grid */
     grid = gtk_grid_new ();
     gtk_grid_set_row_spacing (GTK_GRID (grid), 5);
     gtk_grid_set_column_spacing (GTK_GRID (grid), 8);
@@ -224,10 +240,12 @@ main (int argc, char *argv[])
     gtk_grid_attach (GTK_GRID (grid), check_button, 0, 2, 1, 1);
     gtk_grid_attach (GTK_GRID (grid), login_button, 1, 2, 1, 1);
 
+    gtk_stack_add_named (GTK_STACK (stack), grid, "login");
+
     main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_margin_start (main_box, 5);
     gtk_widget_set_margin_end (main_box, 5);
-    gtk_box_pack_start (GTK_BOX (main_box), grid,
+    gtk_box_pack_start (GTK_BOX (main_box), stack,
                         TRUE, TRUE, 5);
     gtk_box_pack_end (GTK_BOX (main_box), revealer,
                       TRUE, TRUE, 5);

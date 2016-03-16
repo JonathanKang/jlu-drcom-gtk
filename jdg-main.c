@@ -58,11 +58,27 @@ on_login_button_clicked (GtkWidget *button,
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
     GtkWidget *check_button;
+    GtkWidget *revealer;
+    GtkWidget *text_view;
+    GtkTextBuffer *text_buffer;
 
     buffer_array = (GPtrArray *) user_data;
     username_buffer = g_ptr_array_index (buffer_array, 0);
     password_buffer = g_ptr_array_index (buffer_array, 1);
     check_button = g_ptr_array_index (buffer_array, 2);
+    revealer = g_ptr_array_index (buffer_array, 3);
+
+    /* GtkTextView to show output information */
+    text_view = gtk_text_view_new ();
+    gtk_text_view_set_editable (GTK_TEXT_VIEW (text_view), FALSE);
+    gtk_widget_set_size_request (text_view, -1, 400);
+    gtk_widget_set_vexpand (text_view, TRUE);
+    gtk_widget_set_visible (text_view, TRUE);
+    text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (text_view));
+
+    gtk_container_add (GTK_CONTAINER (revealer), text_view);
+    gtk_widget_show (revealer);
+    gtk_revealer_set_reveal_child (GTK_REVEALER (revealer), TRUE);
 
     /* get username and password from entry buffers */
     username = gtk_entry_buffer_get_text (username_buffer);
@@ -128,6 +144,7 @@ main (int argc, char *argv[])
     GtkWidget *password_entry;
     GtkWidget *check_button;
     GtkWidget *login_button;
+    GtkWidget *revealer;
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
     GPtrArray *buffer_array;
@@ -157,10 +174,14 @@ main (int argc, char *argv[])
     check_button = gtk_check_button_new_with_label ("Remember Password");
     login_button = gtk_button_new_with_label ("Login");
 
+    revealer = gtk_revealer_new ();
+    gtk_widget_hide (revealer);
+
     buffer_array = g_ptr_array_new ();
     g_ptr_array_add (buffer_array, (gpointer) username_buffer);
     g_ptr_array_add (buffer_array, (gpointer) password_buffer);
     g_ptr_array_add (buffer_array, (gpointer) check_button);
+    g_ptr_array_add (buffer_array, (gpointer) revealer);
 
     key_file = g_key_file_new ();
     g_key_file_load_from_file (key_file, "jdg.ini",
@@ -208,6 +229,8 @@ main (int argc, char *argv[])
     gtk_widget_set_margin_end (main_box, 5);
     gtk_box_pack_start (GTK_BOX (main_box), grid,
                         TRUE, TRUE, 5);
+    gtk_box_pack_end (GTK_BOX (main_box), revealer,
+                      TRUE, TRUE, 5);
 
     gtk_container_add (GTK_CONTAINER (window), main_box);
     gtk_widget_show_all (window);

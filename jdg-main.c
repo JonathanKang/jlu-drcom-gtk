@@ -22,6 +22,17 @@
 #include "drcom.h"
 
 static void
+on_destroy (GtkWidget *widget,
+            gpointer user_data)
+{
+    GPtrArray *array = (GPtrArray *) user_data;
+
+    g_ptr_array_free (array, FALSE);
+
+    gtk_main_quit ();
+}
+
+static void
 on_check_button_toggled (GtkWidget *check_button,
                          gpointer user_data)
 {
@@ -257,7 +268,7 @@ main (int argc, char *argv[])
     gtk_widget_show_all (window);
 
     /* Signals */
-    g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
+    g_signal_connect (window, "destroy", G_CALLBACK (on_destroy), buffer_array);
     g_signal_connect (password_entry, "activate",
                       G_CALLBACK (on_login_button_clicked), buffer_array);
     g_signal_connect (check_button, "toggled",

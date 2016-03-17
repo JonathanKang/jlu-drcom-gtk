@@ -211,6 +211,7 @@ main (int argc, char *argv[])
     login_button = gtk_button_new_with_label ("Login");
 
     revealer = gtk_revealer_new ();
+    gtk_revealer_set_transition_duration (GTK_REVEALER (revealer), 500);
 
     /* Stack to switch between login page and info page */
     stack = gtk_stack_new ();

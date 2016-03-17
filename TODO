@@ -1,5 +1,3 @@
 * Automatically read mac address
-* Use GtkStack to switch between login page and info page
-    - Login page is where you type your username and password
-    - Info page is where you see some output the login status
+* Connect UI and drcom program
 * Add logout functionality

@@ -91,8 +91,6 @@ on_login_button_clicked (GtkWidget *button,
     username = gtk_entry_buffer_get_text (username_buffer);
     password = gtk_entry_buffer_get_text (password_buffer);
 
-    g_ptr_array_free (buffer_array, FALSE);
-
     key_file = g_key_file_new ();
     g_key_file_load_from_file (key_file, "jdg.ini",
                                G_KEY_FILE_NONE, NULL);
@@ -136,6 +134,34 @@ on_login_button_clicked (GtkWidget *button,
     g_key_file_free (key_file);
 
     //on_login (username, password);
+}
+
+static void
+on_logout_button_clicked (GtkWidget *button,
+                         gpointer user_data)
+{
+    GPtrArray *buffer_array;
+    GtkEntryBuffer *password_buffer;
+    GtkWidget *check_button;
+    GtkWidget *revealer;
+    GtkWidget *stack;
+
+    buffer_array = (GPtrArray *) user_data;
+    password_buffer = g_ptr_array_index (buffer_array, 1);
+    check_button = g_ptr_array_index (buffer_array, 2);
+    revealer = g_ptr_array_index (buffer_array, 3);
+    stack = g_ptr_array_index (buffer_array, 4);
+
+    gtk_revealer_set_reveal_child (GTK_REVEALER (revealer), FALSE);
+    gtk_stack_set_visible_child_name (GTK_STACK (stack), "login");
+
+    if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button)))
+    {
+        const gchar *password;
+
+        password = gtk_entry_buffer_get_text (password_buffer);
+        gtk_entry_buffer_delete_text (password_buffer, 0, sizeof (password));
+    }
 }
 
 int
@@ -275,6 +301,8 @@ main (int argc, char *argv[])
                       G_CALLBACK (on_check_button_toggled), NULL);
     g_signal_connect (login_button, "clicked",
                       G_CALLBACK (on_login_button_clicked), buffer_array);
+    g_signal_connect (logout_button, "clicked",
+                      G_CALLBACK (on_logout_button_clicked), buffer_array);
 
     g_object_unref (icon);
 

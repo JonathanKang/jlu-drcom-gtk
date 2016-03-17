@@ -58,7 +58,6 @@ on_login_button_clicked (GtkWidget *button,
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
     GtkWidget *check_button;
-    GtkWidget *logout_button;
     GtkWidget *revealer;
     GtkWidget *stack;
     GtkWidget *text_view;
@@ -83,11 +82,6 @@ on_login_button_clicked (GtkWidget *button,
     gtk_widget_show (revealer);
     gtk_revealer_set_reveal_child (GTK_REVEALER (revealer), TRUE);
 
-    logout_button = gtk_button_new_with_label ("logout");
-    gtk_widget_set_halign (logout_button, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign (logout_button, GTK_ALIGN_CENTER);
-    gtk_widget_set_visible (logout_button, TRUE);
-    gtk_stack_add_named (GTK_STACK (stack), logout_button, "info");
     gtk_stack_set_visible_child_name (GTK_STACK (stack), "info");
 
     /* get username and password from entry buffers */
@@ -154,6 +148,7 @@ main (int argc, char *argv[])
     GtkWidget *password_entry;
     GtkWidget *check_button;
     GtkWidget *login_button;
+    GtkWidget *logout_button;
     GtkWidget *revealer;
     GtkWidget *stack;
     GtkEntryBuffer *username_buffer;
@@ -240,7 +235,13 @@ main (int argc, char *argv[])
     gtk_grid_attach (GTK_GRID (grid), check_button, 0, 2, 1, 1);
     gtk_grid_attach (GTK_GRID (grid), login_button, 1, 2, 1, 1);
 
+    logout_button = gtk_button_new_with_label ("logout");
+    gtk_widget_set_halign (logout_button, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (logout_button, GTK_ALIGN_CENTER);
+
     gtk_stack_add_named (GTK_STACK (stack), grid, "login");
+    gtk_stack_add_named (GTK_STACK (stack), logout_button, "info");
+    gtk_stack_set_visible_child_name (GTK_STACK (stack), "login");
 
     main_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_margin_start (main_box, 5);

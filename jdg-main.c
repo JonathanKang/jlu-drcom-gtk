@@ -69,19 +69,11 @@ on_login_button_clicked (GtkWidget *button,
     check_button = g_ptr_array_index (buffer_array, 2);
     revealer = g_ptr_array_index (buffer_array, 3);
     stack = g_ptr_array_index (buffer_array, 4);
+    text_view = g_ptr_array_index (buffer_array, 5);
 
-    /* GtkTextView to show output information */
-    text_view = gtk_text_view_new ();
-    gtk_text_view_set_editable (GTK_TEXT_VIEW (text_view), FALSE);
-    gtk_widget_set_size_request (text_view, -1, 400);
-    gtk_widget_set_vexpand (text_view, TRUE);
-    gtk_widget_set_visible (text_view, TRUE);
     text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (text_view));
 
-    gtk_container_add (GTK_CONTAINER (revealer), text_view);
-    gtk_widget_show (revealer);
     gtk_revealer_set_reveal_child (GTK_REVEALER (revealer), TRUE);
-
     gtk_stack_set_visible_child_name (GTK_STACK (stack), "info");
 
     /* get username and password from entry buffers */
@@ -151,6 +143,7 @@ main (int argc, char *argv[])
     GtkWidget *logout_button;
     GtkWidget *revealer;
     GtkWidget *stack;
+    GtkWidget *text_view;
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
     GPtrArray *buffer_array;
@@ -181,10 +174,18 @@ main (int argc, char *argv[])
     login_button = gtk_button_new_with_label ("Login");
 
     revealer = gtk_revealer_new ();
-    gtk_widget_hide (revealer);
 
     /* Stack to switch between login page and info page */
     stack = gtk_stack_new ();
+
+    /* GtkTextView to show output information */
+    text_view = gtk_text_view_new ();
+    gtk_text_view_set_editable (GTK_TEXT_VIEW (text_view), FALSE);
+    gtk_widget_set_size_request (text_view, -1, 400);
+    gtk_widget_set_vexpand (text_view, TRUE);
+    gtk_widget_set_visible (text_view, TRUE);
+
+    gtk_container_add (GTK_CONTAINER (revealer), text_view);
 
     buffer_array = g_ptr_array_new ();
     g_ptr_array_add (buffer_array, (gpointer) username_buffer);
@@ -192,6 +193,7 @@ main (int argc, char *argv[])
     g_ptr_array_add (buffer_array, (gpointer) check_button);
     g_ptr_array_add (buffer_array, (gpointer) revealer);
     g_ptr_array_add (buffer_array, (gpointer) stack);
+    g_ptr_array_add (buffer_array, (gpointer) text_view);
 
     key_file = g_key_file_new ();
     g_key_file_load_from_file (key_file, "jdg.ini",

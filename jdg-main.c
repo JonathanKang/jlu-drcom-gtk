@@ -62,78 +62,102 @@ static void
 on_login_button_clicked (GtkWidget *button,
                          gpointer user_data)
 {
-    const char *username;
-    const char *password;
-    GKeyFile *key_file;
     GPtrArray *buffer_array;
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
-    GtkWidget *check_button;
-    GtkWidget *revealer;
-    GtkWidget *stack;
-    GtkWidget *text_view;
-    GtkTextBuffer *text_buffer;
 
     buffer_array = (GPtrArray *) user_data;
     username_buffer = g_ptr_array_index (buffer_array, 0);
     password_buffer = g_ptr_array_index (buffer_array, 1);
-    check_button = g_ptr_array_index (buffer_array, 2);
-    revealer = g_ptr_array_index (buffer_array, 3);
-    stack = g_ptr_array_index (buffer_array, 4);
-    text_view = g_ptr_array_index (buffer_array, 5);
 
-    text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (text_view));
-
-    gtk_revealer_set_reveal_child (GTK_REVEALER (revealer), TRUE);
-    gtk_stack_set_visible_child_name (GTK_STACK (stack), "info");
-
-    /* get username and password from entry buffers */
-    username = gtk_entry_buffer_get_text (username_buffer);
-    password = gtk_entry_buffer_get_text (password_buffer);
-
-    key_file = g_key_file_new ();
-    g_key_file_load_from_file (key_file, "jdg.ini",
-                               G_KEY_FILE_NONE, NULL);
-
-    if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button)))
+    if (gtk_entry_buffer_get_length (username_buffer) == 0
+        || gtk_entry_buffer_get_length (password_buffer) == 0)
     {
-        if (g_key_file_has_key (key_file, "config", "username", NULL))
+        GtkWidget *dialog;
+        GtkWidget *toplevel;
+
+        toplevel = gtk_widget_get_toplevel (button);
+        dialog = gtk_message_dialog_new (GTK_WINDOW (toplevel),
+                                         GTK_DIALOG_MODAL,
+                                         GTK_MESSAGE_WARNING,
+                                         GTK_BUTTONS_CLOSE,
+                                         "Please input username or password");
+
+        gtk_dialog_run (GTK_DIALOG (dialog));
+        gtk_widget_destroy (dialog);
+    }
+    else
+    {
+        GKeyFile *key_file;
+        GtkWidget *check_button;
+        GtkWidget *revealer;
+        GtkWidget *stack;
+        GtkWidget *text_view;
+        GtkTextBuffer *text_buffer;
+
+        check_button = g_ptr_array_index (buffer_array, 2);
+        revealer = g_ptr_array_index (buffer_array, 3);
+        stack = g_ptr_array_index (buffer_array, 4);
+        text_view = g_ptr_array_index (buffer_array, 5);
+
+        text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (text_view));
+
+        key_file = g_key_file_new ();
+        g_key_file_load_from_file (key_file, "jdg.ini",
+                                   G_KEY_FILE_NONE, NULL);
+
+        if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button)))
         {
-            gchar *str_un;
+            const char *username;
+            const char *password;
 
-            str_un = g_key_file_get_string (key_file,
-                                            "config", "username", NULL);
+            /* get username and password from entry buffers */
+            username = gtk_entry_buffer_get_text (username_buffer);
+            password = gtk_entry_buffer_get_text (password_buffer);
 
-            if (g_strcmp0 (username, str_un) != 0)
+            if (g_key_file_has_key (key_file, "config", "username", NULL))
+            {
+                gchar *str_un;
+
+                str_un = g_key_file_get_string (key_file,
+                                                "config", "username", NULL);
+
+                if (g_strcmp0 (username, str_un) != 0)
+                {
+                    g_key_file_set_string (key_file,
+                                           "config", "username", username);
+                    g_key_file_set_string (key_file,
+                                           "config", "password", password);
+                }
+
+                g_free (str_un);
+            }
+            else
             {
                 g_key_file_set_string (key_file,
                                        "config", "username", username);
                 g_key_file_set_string (key_file,
                                        "config", "password", password);
             }
-
-            g_free (str_un);
         }
         else
         {
-            g_key_file_set_string (key_file, "config", "username", username);
-            g_key_file_set_string (key_file, "config", "password", password);
+            if (g_key_file_has_key (key_file, "config", "username", NULL))
+            {
+                g_key_file_remove_key (key_file, "config", "username", NULL);
+                g_key_file_remove_key (key_file, "config", "password", NULL);
+            }
         }
+
+        g_key_file_save_to_file (key_file, "jdg.ini", NULL);
+
+        g_key_file_free (key_file);
+
+        gtk_revealer_set_reveal_child (GTK_REVEALER (revealer), TRUE);
+        gtk_stack_set_visible_child_name (GTK_STACK (stack), "info");
+
+        //on_login (username, password);
     }
-    else
-    {
-        if (g_key_file_has_key (key_file, "config", "username", NULL))
-        {
-            g_key_file_remove_key (key_file, "config", "username", NULL);
-            g_key_file_remove_key (key_file, "config", "password", NULL);
-        }
-    }
-
-    g_key_file_save_to_file (key_file, "jdg.ini", NULL);
-
-    g_key_file_free (key_file);
-
-    //on_login (username, password);
 }
 
 static void

@@ -35,45 +35,8 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#include "drcom.h"
 #include "md5.h"
-
-// 必须修改，帐号密码和 mac 地址是绑定的
-uint64_t mac = 0x000000000000; // echo 0x`ifconfig eth | egrep -io "([0-9a-f]{2}:){5}[0-9a-f]{2}" | tr -d ":"`
-
-
-// 不一定要修改
-char host[] = "drcom";
-char os[] = "drcom";
-int host_len = sizeof(host) - 1;
-int os_len = sizeof(os) - 1;
-
-// TODO 增加从文件读取参数
-
-//SERVER_DOMAIN login.jlu.edu.cn
-#define SERVER_ADDR "10.100.61.3"
-#define SERVER_PORT 61440
-
-#define RECV_DATA_SIZE 1000
-#define SEND_DATA_SIZE 1000
-#define CHALLENGE_TRY 10
-#define LOGIN_TRY 5
-#define ALIVE_TRY 5
-
-/* infomation */
-struct user_info_pkt {
-	const char *username;
-	const char *password;
-	char *hostname;
-	char *os_name;
-	uint64_t mac_addr;
-	int username_len;
-	int password_len;
-	int hostname_len;
-	int os_name_len;
-};
-
-/* signal process flag */
-int logout_flag = 0;
 
 void
 get_user_info (struct user_info_pkt *user_info,

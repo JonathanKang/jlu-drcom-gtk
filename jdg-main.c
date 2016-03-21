@@ -62,13 +62,13 @@ static void
 on_login_button_clicked (GtkWidget *button,
                          gpointer user_data)
 {
-    GPtrArray *buffer_array;
+    GPtrArray *array;
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
 
-    buffer_array = (GPtrArray *) user_data;
-    username_buffer = g_ptr_array_index (buffer_array, 0);
-    password_buffer = g_ptr_array_index (buffer_array, 1);
+    array = (GPtrArray *) user_data;
+    username_buffer = g_ptr_array_index (array, 0);
+    password_buffer = g_ptr_array_index (array, 1);
 
     if (gtk_entry_buffer_get_length (username_buffer) == 0
         || gtk_entry_buffer_get_length (password_buffer) == 0)
@@ -95,10 +95,10 @@ on_login_button_clicked (GtkWidget *button,
         GtkWidget *text_view;
         GtkTextBuffer *text_buffer;
 
-        check_button = g_ptr_array_index (buffer_array, 2);
-        revealer = g_ptr_array_index (buffer_array, 3);
-        stack = g_ptr_array_index (buffer_array, 4);
-        text_view = g_ptr_array_index (buffer_array, 5);
+        check_button = g_ptr_array_index (array, 2);
+        revealer = g_ptr_array_index (array, 3);
+        stack = g_ptr_array_index (array, 4);
+        text_view = g_ptr_array_index (array, 5);
 
         text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (text_view));
 
@@ -164,17 +164,17 @@ static void
 on_logout_button_clicked (GtkWidget *button,
                          gpointer user_data)
 {
-    GPtrArray *buffer_array;
+    GPtrArray *array;
     GtkEntryBuffer *password_buffer;
     GtkWidget *check_button;
     GtkWidget *revealer;
     GtkWidget *stack;
 
-    buffer_array = (GPtrArray *) user_data;
-    password_buffer = g_ptr_array_index (buffer_array, 1);
-    check_button = g_ptr_array_index (buffer_array, 2);
-    revealer = g_ptr_array_index (buffer_array, 3);
-    stack = g_ptr_array_index (buffer_array, 4);
+    array = (GPtrArray *) user_data;
+    password_buffer = g_ptr_array_index (array, 1);
+    check_button = g_ptr_array_index (array, 2);
+    revealer = g_ptr_array_index (array, 3);
+    stack = g_ptr_array_index (array, 4);
 
     gtk_revealer_set_reveal_child (GTK_REVEALER (revealer), FALSE);
     gtk_stack_set_visible_child_name (GTK_STACK (stack), "login");
@@ -207,7 +207,7 @@ main (int argc, char *argv[])
     GtkWidget *text_view;
     GtkEntryBuffer *username_buffer;
     GtkEntryBuffer *password_buffer;
-    GPtrArray *buffer_array;
+    GPtrArray *array;
     GKeyFile *key_file;
 
     gtk_init (&argc, &argv);
@@ -249,13 +249,13 @@ main (int argc, char *argv[])
 
     gtk_container_add (GTK_CONTAINER (revealer), text_view);
 
-    buffer_array = g_ptr_array_new ();
-    g_ptr_array_add (buffer_array, (gpointer) username_buffer);
-    g_ptr_array_add (buffer_array, (gpointer) password_buffer);
-    g_ptr_array_add (buffer_array, (gpointer) check_button);
-    g_ptr_array_add (buffer_array, (gpointer) revealer);
-    g_ptr_array_add (buffer_array, (gpointer) stack);
-    g_ptr_array_add (buffer_array, (gpointer) text_view);
+    array = g_ptr_array_new ();
+    g_ptr_array_add (array, (gpointer) username_buffer);
+    g_ptr_array_add (array, (gpointer) password_buffer);
+    g_ptr_array_add (array, (gpointer) check_button);
+    g_ptr_array_add (array, (gpointer) revealer);
+    g_ptr_array_add (array, (gpointer) stack);
+    g_ptr_array_add (array, (gpointer) text_view);
 
     key_file = g_key_file_new ();
     g_key_file_load_from_file (key_file, "jdg.ini",
@@ -319,15 +319,15 @@ main (int argc, char *argv[])
     gtk_widget_show_all (window);
 
     /* Signals */
-    g_signal_connect (window, "destroy", G_CALLBACK (on_destroy), buffer_array);
+    g_signal_connect (window, "destroy", G_CALLBACK (on_destroy), array);
     g_signal_connect (password_entry, "activate",
-                      G_CALLBACK (on_login_button_clicked), buffer_array);
+                      G_CALLBACK (on_login_button_clicked), array);
     g_signal_connect (check_button, "toggled",
                       G_CALLBACK (on_check_button_toggled), NULL);
     g_signal_connect (login_button, "clicked",
-                      G_CALLBACK (on_login_button_clicked), buffer_array);
+                      G_CALLBACK (on_login_button_clicked), array);
     g_signal_connect (logout_button, "clicked",
-                      G_CALLBACK (on_logout_button_clicked), buffer_array);
+                      G_CALLBACK (on_logout_button_clicked), array);
 
     g_object_unref (icon);
 

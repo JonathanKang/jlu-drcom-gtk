@@ -162,7 +162,7 @@ on_login_button_clicked (GtkWidget *button,
 
 static void
 on_logout_button_clicked (GtkWidget *button,
-                         gpointer user_data)
+                          gpointer user_data)
 {
     GPtrArray *array;
     GtkEntryBuffer *password_buffer;

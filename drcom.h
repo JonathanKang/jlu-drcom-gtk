@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <netinet/in.h>
 
 // 必须修改，帐号密码和 mac 地址是绑定的

@@ -94,7 +94,7 @@ challenge (int sock,
             close (sock);
             fprintf (stdout,
                      "[drcom-challenge]: try challenge, but failed, please check your network connection.\n");
-            return FALSE;
+            return false;
         }
 
         set_challenge_data (clg_data, clg_data_len, challenge_try);
@@ -123,7 +123,7 @@ challenge (int sock,
             {
                 close (sock);
                 fprintf (stdout, "[drcom-challenge]: wrong challenge data.\n");
-                return FALSE;
+                return false;
             }
             fprintf (stdout, "[drcom-challenge]: challenge failed!, try again.\n");
         }
@@ -131,7 +131,7 @@ challenge (int sock,
 
     fprintf (stdout, "[drcom-challenge]: challenge success!\n");
 
-    return TRUE;
+    return true;
 }
 
 void
@@ -328,7 +328,7 @@ login (int sock,
             close (sock);
             fprintf (stdout,
                      "[drcom-login]: try login, but failed, something wrong\n");
-            return FALSE;
+            return false;
         }
 
         login_try++;
@@ -357,7 +357,7 @@ login (int sock,
                 close (sock);
                 fprintf (stdout,
                          "[drcom-login]: wrong password or username!\n\n");
-                return FALSE;
+                return false;
             }
             fprintf (stdout, "[drcom-login]: login failed!, try again\n");
         }
@@ -365,7 +365,7 @@ login (int sock,
 
     fprintf (stdout, "[drcom-login]: login success!\n");
 
-    return TRUE;
+    return true;
 }
 
 void
@@ -433,7 +433,7 @@ logout (int sock,
     // TODO
 
     close (sock);
-    return FALSE;
+    return false;
 }
 
 void

@@ -93,7 +93,7 @@ challenge (int sock,
         {
             close (sock);
             fprintf (stderr,
-                    "[drcom-challenge]: try challenge, but failed, please check your network connection.\n");
+                     "[drcom-challenge]: try challenge, but failed, please check your network connection.\n");
             exit (EXIT_FAILURE);
         }
 
@@ -113,7 +113,7 @@ challenge (int sock,
         if (ret < 0)
         {
             fprintf (stderr,
-                    "[drcom-challenge]: recieve data from server failed.\n");
+                     "[drcom-challenge]: recieve data from server failed.\n");
             continue;
         }
 
@@ -516,7 +516,7 @@ on_login (const char *username,
         {
             close (sock);
 //          fprintf (stderr,
-//                  "[drcom-keep-alive]: couldn't connect to network, check please.\n");
+//                   "[drcom-keep-alive]: couldn't connect to network, check please.\n");
             exit (EXIT_FAILURE);
         }
 
@@ -531,7 +531,7 @@ on_login (const char *username,
         {
             alive_fail_count++;
 //          fprintf (stderr,
-//                  "[drcom-keep-alive]: send keep-alive data failed.\n");
+//                   "[drcom-keep-alive]: send keep-alive data failed.\n");
             continue;
         }
         else
@@ -546,7 +546,7 @@ on_login (const char *username,
         {
             alive_fail_count++;
 //          fprintf (stderr,
-//                  "[drcom-keep-alive]: recieve keep-alive response data from server failed.\n");
+//                   "[drcom-keep-alive]: recieve keep-alive response data from server failed.\n");
             continue;
         }
         else

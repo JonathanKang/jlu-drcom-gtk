@@ -92,7 +92,7 @@ challenge (int sock,
         if (challenge_try > CHALLENGE_TRY)
         {
             close (sock);
-            fprintf (stderr,
+            fprintf (stdout,
                      "[drcom-challenge]: try challenge, but failed, please check your network connection.\n");
             exit (EXIT_FAILURE);
         }
@@ -105,14 +105,14 @@ challenge (int sock,
                       (struct sockaddr *)&serv_addr, sizeof (serv_addr));
         if (ret != clg_data_len)
         {
-            fprintf (stderr, "[drcom-challenge]: send challenge data failed\n");
+            fprintf (stdout, "[drcom-challenge]: send challenge data failed\n");
             continue;
         }
 
         ret = recvfrom (sock, recv_data, recv_len, 0, NULL, NULL);
         if (ret < 0)
         {
-            fprintf (stderr,
+            fprintf (stdout,
                      "[drcom-challenge]: recieve data from server failed.\n");
             continue;
         }
@@ -122,10 +122,10 @@ challenge (int sock,
             if (*recv_data == 0x07)
             {
                 close (sock);
-                fprintf (stderr, "[drcom-challenge]: wrong challenge data.\n");
+                fprintf (stdout, "[drcom-challenge]: wrong challenge data.\n");
                 exit (EXIT_FAILURE);
             }
-            fprintf (stderr, "[drcom-challenge]: challenge failed!, try again.\n");
+            fprintf (stdout, "[drcom-challenge]: challenge failed!, try again.\n");
         }
     } while ((*recv_data != 0x02));
 
@@ -324,7 +324,7 @@ login (int sock,
         if (login_try > LOGIN_TRY)
         {
             close (sock);
-            fprintf (stderr,
+            fprintf (stdout,
                      "[drcom-login]: try login, but failed, something wrong\n");
             exit (EXIT_FAILURE);
         }
@@ -336,14 +336,14 @@ login (int sock,
                       (struct sockaddr *)&serv_addr, sizeof (serv_addr));
         if (ret != login_data_len)
         {
-            fprintf (stderr, "[drcom-login]: send login data failed.\n");
+            fprintf (stdout, "[drcom-login]: send login data failed.\n");
             continue;
         }
 
         ret = recvfrom (sock, recv_data, recv_len, 0, NULL, NULL);
         if (ret < 0)
         {
-            fprintf(stderr,
+            fprintf(stdout,
                     "[drcom-login]: recieve data from server failed.\n");
             continue;
         }
@@ -353,11 +353,11 @@ login (int sock,
             if (*recv_data == 0x05)
             {
                 close (sock);
-                fprintf (stderr,
+                fprintf (stdout,
                          "[drcom-login]: wrong password or username!\n\n");
                 exit (EXIT_FAILURE);
             }
-            fprintf (stderr, "[drcom-login]: login failed!, try again\n");
+            fprintf (stdout, "[drcom-login]: login failed!, try again\n");
         }
     } while ((*recv_data != 0x04));
 
@@ -451,7 +451,7 @@ on_login (const char *username,
     sock = socket (AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
     {
-        fprintf (stderr, "[drcom]: create sock failed.\n");
+        fprintf (stdout, "[drcom]: create sock failed.\n");
         exit (EXIT_FAILURE);
     }
     serv_addr.sin_family = AF_INET;
@@ -475,7 +475,7 @@ on_login (const char *username,
     {
         case -1:
             close (sock);
-            fprintf (stderr,
+            fprintf (stdout,
                      "[drcom-keep-alive]: drcom failed to run in daemon.\n");
             exit (EXIT_FAILURE);
         case 0:
@@ -496,7 +496,6 @@ on_login (const char *username,
 
     close (STDIN_FILENO);
     close (STDOUT_FILENO);
-    close (STDERR_FILENO);
 
     signal (SIGINT, logout_signal);
 
@@ -515,7 +514,7 @@ on_login (const char *username,
         if (alive_fail_count > ALIVE_TRY)
         {
             close (sock);
-//          fprintf (stderr,
+//          fprintf (stdout,
 //                   "[drcom-keep-alive]: couldn't connect to network, check please.\n");
             exit (EXIT_FAILURE);
         }
@@ -530,7 +529,7 @@ on_login (const char *username,
         if (ret != alive_data_len)
         {
             alive_fail_count++;
-//          fprintf (stderr,
+//          fprintf (stdout,
 //                   "[drcom-keep-alive]: send keep-alive data failed.\n");
             continue;
         }
@@ -545,7 +544,7 @@ on_login (const char *username,
         if (ret < 0 || *recv_data != 0x07)
         {
             alive_fail_count++;
-//          fprintf (stderr,
+//          fprintf (stdout,
 //                   "[drcom-keep-alive]: recieve keep-alive response data from server failed.\n");
             continue;
         }

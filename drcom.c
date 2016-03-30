@@ -76,7 +76,7 @@ set_challenge_data (unsigned char *clg_data,
     clg_data[data_index++] = 0x09;
 }
 
-void
+bool
 challenge (int sock,
            struct sockaddr_in serv_addr,
            unsigned char *clg_data,
@@ -94,7 +94,7 @@ challenge (int sock,
             close (sock);
             fprintf (stdout,
                      "[drcom-challenge]: try challenge, but failed, please check your network connection.\n");
-            exit (EXIT_FAILURE);
+            return FALSE;
         }
 
         set_challenge_data (clg_data, clg_data_len, challenge_try);
@@ -123,13 +123,15 @@ challenge (int sock,
             {
                 close (sock);
                 fprintf (stdout, "[drcom-challenge]: wrong challenge data.\n");
-                exit (EXIT_FAILURE);
+                return FALSE;
             }
             fprintf (stdout, "[drcom-challenge]: challenge failed!, try again.\n");
         }
     } while ((*recv_data != 0x02));
 
     fprintf (stdout, "[drcom-challenge]: challenge success!\n");
+
+    return TRUE;
 }
 
 void
@@ -307,7 +309,7 @@ set_login_data (struct user_info_pkt *user_info,
     }
 }
 
-void
+bool
 login (int sock,
        struct sockaddr_in serv_addr,
        unsigned char *login_data,
@@ -326,7 +328,7 @@ login (int sock,
             close (sock);
             fprintf (stdout,
                      "[drcom-login]: try login, but failed, something wrong\n");
-            exit (EXIT_FAILURE);
+            return FALSE;
         }
 
         login_try++;
@@ -355,13 +357,15 @@ login (int sock,
                 close (sock);
                 fprintf (stdout,
                          "[drcom-login]: wrong password or username!\n\n");
-                exit (EXIT_FAILURE);
+                return FALSE;
             }
             fprintf (stdout, "[drcom-login]: login failed!, try again\n");
         }
     } while ((*recv_data != 0x04));
 
     fprintf (stdout, "[drcom-login]: login success!\n");
+
+    return TRUE;
 }
 
 void
@@ -417,7 +421,7 @@ set_logout_data (unsigned char *logout_data,
     // TODO
 }
 
-void
+bool
 logout (int sock,
         struct sockaddr_in serv_addr,
         unsigned char *logout_data,
@@ -429,7 +433,7 @@ logout (int sock,
     // TODO
 
     close (sock);
-    exit (EXIT_SUCCESS);
+    return FALSE;
 }
 
 void

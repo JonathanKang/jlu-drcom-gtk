@@ -99,6 +99,11 @@ bool logout (int sock,
              char *recv_data,
              int recv_len);
 void logout_signal (int signum);
+bool keep_alive (int sock,
+                 struct sockaddr_in serv_addr,
+                 unsigned char *send_data,
+                 char *recv_data,
+                 int recv_len);
 void on_login (const char *username, const char *password);
 
 #endif /* DRCOM_H_ */

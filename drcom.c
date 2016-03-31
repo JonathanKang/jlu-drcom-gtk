@@ -442,6 +442,81 @@ logout_signal (int signum)
     logout_flag = 1;
 }
 
+bool
+keep_alive (int sock,
+            struct sockaddr_in serv_addr,
+            unsigned char *send_data,
+            char *recv_data,
+            int recv_len)
+{
+    // keep alive alive data length 42 or 40
+    unsigned char tail[4];
+    int tail_len = 4;
+    int random = rand () % 0xFFFF;
+    int alive_data_len = 0;
+    int alive_count = 0;
+    int alive_fail_count = 0;
+    int ret;
+
+    memset (tail, 0x00, tail_len);
+
+    do
+    {
+        if (alive_fail_count > ALIVE_TRY)
+        {
+            close (sock);
+            fprintf (stdout,
+                     "[drcom-keep-alive]: couldn't connect to network, check please.\n");
+            return false;
+        }
+
+        alive_data_len = alive_count > 0 ? 40 : 42;
+        set_alive_data (send_data,
+                        alive_data_len, tail, tail_len, alive_count, random);
+
+        ret = sendto (sock,
+                      send_data, alive_data_len, 0,
+                      (struct sockaddr *)&serv_addr, sizeof (serv_addr));
+        if (ret != alive_data_len)
+        {
+            alive_fail_count++;
+            fprintf (stdout,
+                     "[drcom-keep-alive]: send keep-alive data failed.\n");
+            continue;
+        }
+        else
+        {
+            alive_fail_count = 0;
+        }
+
+        memset (recv_data, 0x00, RECV_DATA_SIZE);
+
+        ret = recvfrom (sock, recv_data, recv_len, 0, NULL, NULL);
+        if (ret < 0 || *recv_data != 0x07)
+        {
+            alive_fail_count++;
+            fprintf (stdout,
+                     "[drcom-keep-alive]: recieve keep-alive response data from server failed.\n");
+            continue;
+        }
+        else
+        {
+            alive_fail_count = 0;
+        }
+
+        if (alive_count > 1)
+        {
+            memcpy (tail, recv_data+16, tail_len);
+        }
+
+        sleep (15);
+        fprintf (stdout, "[drcom-keep-alive]: keep alive.\n");
+        alive_count = (alive_count + 1) % 3;
+    } while (logout_flag != 1);
+
+    return true;
+}
+
 void
 on_login (const char *username,
           const char *password)
@@ -503,69 +578,7 @@ on_login (const char *username,
 
     signal (SIGINT, logout_signal);
 
-    // keep alive alive data length 42 or 40
-    unsigned char tail[4];
-    int tail_len = 4;
-    memset (tail, 0x00, tail_len);
-    int random = rand () % 0xFFFF;
-
-    int alive_data_len = 0;
-    int alive_count = 0;
-    int alive_fail_count = 0;
-
-    do
-    {
-        if (alive_fail_count > ALIVE_TRY)
-        {
-            close (sock);
-//          fprintf (stdout,
-//                   "[drcom-keep-alive]: couldn't connect to network, check please.\n");
-            exit (EXIT_FAILURE);
-        }
-
-        alive_data_len = alive_count > 0 ? 40 : 42;
-        set_alive_data (send_data,
-                        alive_data_len, tail, tail_len, alive_count, random);
-
-        ret = sendto (sock,
-                      send_data, alive_data_len, 0,
-                      (struct sockaddr *)&serv_addr, sizeof (serv_addr));
-        if (ret != alive_data_len)
-        {
-            alive_fail_count++;
-//          fprintf (stdout,
-//                   "[drcom-keep-alive]: send keep-alive data failed.\n");
-            continue;
-        }
-        else
-        {
-            alive_fail_count = 0;
-        }
-
-        memset (recv_data, 0x00, RECV_DATA_SIZE);
-
-        ret = recvfrom (sock, recv_data, RECV_DATA_SIZE, 0, NULL, NULL);
-        if (ret < 0 || *recv_data != 0x07)
-        {
-            alive_fail_count++;
-//          fprintf (stdout,
-//                   "[drcom-keep-alive]: recieve keep-alive response data from server failed.\n");
-            continue;
-        }
-        else
-        {
-            alive_fail_count = 0;
-        }
-
-        if (alive_count > 1)
-        {
-            memcpy (tail, recv_data+16, tail_len);
-        }
-
-        sleep (15);
-//      fprintf (stdout, "[drcom-keep-alive]: keep alive.\n");
-        alive_count = (alive_count + 1) % 3;
-    } while (logout_flag != 1);
+    keep_alive (sock, serv_addr, send_data, recv_data, RECV_DATA_SIZE);
 
     // logout, data_length 80 or ?
     memset (recv_data, 0x00, RECV_DATA_SIZE);

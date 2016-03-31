@@ -88,12 +88,18 @@ on_login_button_clicked (GtkWidget *button,
     }
     else
     {
+        const char *username;
+        const char *password;
         GKeyFile *key_file;
         GtkWidget *check_button;
         GtkWidget *revealer;
         GtkWidget *stack;
         GtkWidget *text_view;
         GtkTextBuffer *text_buffer;
+
+        /* get username and password from entry buffers */
+        username = gtk_entry_buffer_get_text (username_buffer);
+        password = gtk_entry_buffer_get_text (password_buffer);
 
         check_button = g_ptr_array_index (array, 2);
         revealer = g_ptr_array_index (array, 3);
@@ -108,13 +114,6 @@ on_login_button_clicked (GtkWidget *button,
 
         if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button)))
         {
-            const char *username;
-            const char *password;
-
-            /* get username and password from entry buffers */
-            username = gtk_entry_buffer_get_text (username_buffer);
-            password = gtk_entry_buffer_get_text (password_buffer);
-
             if (g_key_file_has_key (key_file, "config", "username", NULL))
             {
                 gchar *str_un;

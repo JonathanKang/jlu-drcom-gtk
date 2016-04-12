@@ -531,7 +531,7 @@ on_login (const char *username,
     if (sock < 0)
     {
         fprintf (stdout, "[drcom]: create sock failed.\n");
-        exit (EXIT_FAILURE);
+        //exit (EXIT_FAILURE);
     }
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = inet_addr(SERVER_ADDR);
@@ -556,21 +556,21 @@ on_login (const char *username,
             close (sock);
             fprintf (stdout,
                      "[drcom-keep-alive]: drcom failed to run in daemon.\n");
-            exit (EXIT_FAILURE);
+            //exit (EXIT_FAILURE);
         case 0:
             break;
         default:
             fprintf (stdout, "[drcom-keep-alive]: drcom running in daemon!\n");
-            exit (EXIT_SUCCESS);
+            //exit (EXIT_SUCCESS);
     }
     if (setsid () < 0)
     {
-        exit (EXIT_FAILURE);
+        //exit (EXIT_FAILURE);
     }
     umask (0);
     if (chdir ("/tmp/") < 0)
     {
-        exit (EXIT_FAILURE);
+        //exit (EXIT_FAILURE);
     }
 
     close (STDIN_FILENO);

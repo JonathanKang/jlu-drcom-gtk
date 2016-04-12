@@ -11,3 +11,5 @@ gcc jdg-main.c drcom.c md5.c -o jlu-drcom-gtk `pkg-config --cflags --libs gtk+-3
 * Automatically read mac address
 * Connect UI and drcom program
 * Add logout functionality
+* Login after UI change has been completed
+* Use GtkTextEntry instead of fprintf to print debug message

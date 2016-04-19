@@ -82,7 +82,8 @@ challenge (int sock,
            unsigned char *clg_data,
            int clg_data_len,
            char *recv_data,
-           int recv_len)
+           int recv_len,
+           GtkTextBuffer *text_buffer)
 {
     int ret;
     int challenge_try = 0;
@@ -92,8 +93,12 @@ challenge (int sock,
         if (challenge_try > CHALLENGE_TRY)
         {
             close (sock);
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom-challenge]: try challenge, but failed, please check your network connection.\n",
+                                              strlen ("[drcom-challenge]: try challenge, but failed, please check your network connection.\n"));
             fprintf (stdout,
                      "[drcom-challenge]: try challenge, but failed, please check your network connection.\n");
+
             return false;
         }
 
@@ -105,15 +110,23 @@ challenge (int sock,
                       (struct sockaddr *)&serv_addr, sizeof (serv_addr));
         if (ret != clg_data_len)
         {
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom-challenge]: send challenge data failed\n",
+                                              strlen ("[drcom-challenge]: send challenge data failed\n"));
             fprintf (stdout, "[drcom-challenge]: send challenge data failed\n");
+
             continue;
         }
 
         ret = recvfrom (sock, recv_data, recv_len, 0, NULL, NULL);
         if (ret < 0)
         {
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom-challenge]: recieve data from server failed.\n",
+                                              strlen ("[drcom-challenge]: recieve data from server failed.\n"));
             fprintf (stdout,
                      "[drcom-challenge]: recieve data from server failed.\n");
+
             continue;
         }
 
@@ -122,13 +135,25 @@ challenge (int sock,
             if (*recv_data == 0x07)
             {
                 close (sock);
+
+                gtk_text_buffer_insert_at_cursor (text_buffer,
+                                                  "[drcom-challenge]: wrong challenge data.\n",
+                                                  strlen ("[drcom-challenge]: wrong challenge data.\n"));
                 fprintf (stdout, "[drcom-challenge]: wrong challenge data.\n");
+
                 return false;
             }
+
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom-challenge]: challenge failed!, try again.\n",
+                                              strlen ("[drcom-challenge]: challenge failed!, try again.\n"));
             fprintf (stdout, "[drcom-challenge]: challenge failed!, try again.\n");
         }
     } while ((*recv_data != 0x02));
 
+    gtk_text_buffer_insert_at_cursor (text_buffer,
+                                      "[drcom-challenge]: challenge success!\n",
+                                      strlen ("[drcom-challenge]: challenge success!\n"));
     fprintf (stdout, "[drcom-challenge]: challenge success!\n");
 
     return true;
@@ -315,7 +340,8 @@ login (int sock,
        unsigned char *login_data,
        int login_data_len,
        char *recv_data,
-       int recv_len)
+       int recv_len,
+       GtkTextBuffer *text_buffer)
 {
     /* login */
     int ret = 0;
@@ -326,8 +352,12 @@ login (int sock,
         if (login_try > LOGIN_TRY)
         {
             close (sock);
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom-login]: try login, but failed, something wrong\n",
+                                              strlen ("[drcom-login]: try login, but failed, something wrong\n"));
             fprintf (stdout,
                      "[drcom-login]: try login, but failed, something wrong\n");
+
             return false;
         }
 
@@ -338,15 +368,23 @@ login (int sock,
                       (struct sockaddr *)&serv_addr, sizeof (serv_addr));
         if (ret != login_data_len)
         {
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom-login]: send login data failed.\n",
+                                              strlen ("[drcom-login]: send login data failed.\n"));
             fprintf (stdout, "[drcom-login]: send login data failed.\n");
+
             continue;
         }
 
         ret = recvfrom (sock, recv_data, recv_len, 0, NULL, NULL);
         if (ret < 0)
         {
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom-login]: recieve data from server failed.\n",
+                                              strlen ("[drcom-login]: recieve data from server failed.\n"));
             fprintf(stdout,
                     "[drcom-login]: recieve data from server failed.\n");
+
             continue;
         }
 
@@ -355,14 +393,23 @@ login (int sock,
             if (*recv_data == 0x05)
             {
                 close (sock);
+                gtk_text_buffer_insert_at_cursor (text_buffer,
+                                                  "[drcom-login]: wrong password or username!\n\n",
+                                                  strlen ("[drcom-login]: wrong password or username!\n\n"));
                 fprintf (stdout,
                          "[drcom-login]: wrong password or username!\n\n");
                 return false;
             }
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom-login]: login failed!, try again\n",
+                                              strlen ("[drcom-login]: login failed!, try again\n"));
             fprintf (stdout, "[drcom-login]: login failed!, try again\n");
         }
     } while ((*recv_data != 0x04));
 
+    gtk_text_buffer_insert_at_cursor (text_buffer,
+                                      "[drcom-login]: login success!\n",
+                                      strlen ("[drcom-login]: login success!\n"));
     fprintf (stdout, "[drcom-login]: login success!\n");
 
     return true;
@@ -427,7 +474,8 @@ logout (int sock,
         unsigned char *logout_data,
         int logout_data_len,
         char *recv_data,
-        int recv_len)
+        int recv_len,
+        GtkTextBuffer *text_buffer)
 {
     set_logout_data (logout_data, logout_data_len);
     // TODO
@@ -447,7 +495,8 @@ keep_alive (int sock,
             struct sockaddr_in serv_addr,
             unsigned char *send_data,
             char *recv_data,
-            int recv_len)
+            int recv_len,
+            GtkTextBuffer *text_buffer)
 {
     // keep alive alive data length 42 or 40
     unsigned char tail[4];
@@ -465,8 +514,12 @@ keep_alive (int sock,
         if (alive_fail_count > ALIVE_TRY)
         {
             close (sock);
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom-keep-alive]: couldn't connect to network, check please.\n",
+                                              strlen ("[drcom-keep-alive]: couldn't connect to network, check please.\n"));
             fprintf (stdout,
                      "[drcom-keep-alive]: couldn't connect to network, check please.\n");
+
             return false;
         }
 
@@ -480,8 +533,13 @@ keep_alive (int sock,
         if (ret != alive_data_len)
         {
             alive_fail_count++;
+
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom-keep-alive]: send keep-alive data failed.\n",
+                                              strlen ("[drcom-keep-alive]: send keep-alive data failed.\n"));
             fprintf (stdout,
                      "[drcom-keep-alive]: send keep-alive data failed.\n");
+
             continue;
         }
         else
@@ -495,8 +553,13 @@ keep_alive (int sock,
         if (ret < 0 || *recv_data != 0x07)
         {
             alive_fail_count++;
+
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom-keep-alive]: recieve keep-alive response data from server failed.\n",
+                                              strlen ("[drcom-keep-alive]: recieve keep-alive response data from server failed.\n"));
             fprintf (stdout,
                      "[drcom-keep-alive]: recieve keep-alive response data from server failed.\n");
+
             continue;
         }
         else
@@ -510,6 +573,9 @@ keep_alive (int sock,
         }
 
         sleep (15);
+        gtk_text_buffer_insert_at_cursor (text_buffer,
+                                          "[drcom-keep-alive]: keep alive.\n",
+                                          strlen ("[drcom-keep-alive]: keep alive.\n"));
         fprintf (stdout, "[drcom-keep-alive]: keep alive.\n");
         alive_count = (alive_count + 1) % 3;
     } while (logout_flag != 1);
@@ -519,7 +585,8 @@ keep_alive (int sock,
 
 void
 on_login (const char *username,
-          const char *password)
+          const char *password,
+          GtkTextBuffer *text_buffer)
 {
     int sock, ret;
     unsigned char send_data[SEND_DATA_SIZE];
@@ -530,6 +597,9 @@ on_login (const char *username,
     sock = socket (AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
     {
+        gtk_text_buffer_insert_at_cursor (text_buffer,
+                                          "[drcom]: create sock failed.\n",
+                                          strlen ("[drcom]: create sock failed.\n"));
         fprintf (stdout, "[drcom]: create sock failed.\n");
         //exit (EXIT_FAILURE);
     }
@@ -541,13 +611,13 @@ on_login (const char *username,
     get_user_info (&user_info, username, password);
 
     // challenge data length 20
-    challenge (sock, serv_addr, send_data, 20, recv_data, RECV_DATA_SIZE);
+    challenge (sock, serv_addr, send_data, 20, recv_data, RECV_DATA_SIZE, text_buffer);
 
     // login data length 338, salt length 4
     set_login_data (&user_info,
                     send_data, 338, (unsigned char *)(recv_data + 4), 4);
     memset (recv_data, 0x00, RECV_DATA_SIZE);
-    login (sock, serv_addr, send_data, 338, recv_data, RECV_DATA_SIZE);
+    login (sock, serv_addr, send_data, 338, recv_data, RECV_DATA_SIZE, text_buffer);
 
     // daemon process
     switch (fork ())
@@ -578,9 +648,9 @@ on_login (const char *username,
 
     signal (SIGINT, logout_signal);
 
-    keep_alive (sock, serv_addr, send_data, recv_data, RECV_DATA_SIZE);
+    keep_alive (sock, serv_addr, send_data, recv_data, RECV_DATA_SIZE, text_buffer);
 
     // logout, data_length 80 or ?
     memset (recv_data, 0x00, RECV_DATA_SIZE);
-    logout (sock, serv_addr, send_data, 80, recv_data, RECV_DATA_SIZE);
+    logout (sock, serv_addr, send_data, 80, recv_data, RECV_DATA_SIZE, text_buffer);
 }

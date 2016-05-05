@@ -19,6 +19,9 @@
 #include <gtk/gtk.h>
 #include <glib-object.h>
 
+#include <string.h>
+#include <arpa/inet.h>
+
 #include "drcom.h"
 
 static void
@@ -162,6 +165,41 @@ on_login_button_clicked (GtkWidget *button,
         gtk_stack_set_visible_child_name (GTK_STACK (stack), "info");
 
         //on_login (username, password);
+        int sock, ret;
+        unsigned char send_data[SEND_DATA_SIZE];
+        char recv_data[RECV_DATA_SIZE];
+        struct sockaddr_in serv_addr;
+        struct user_info_pkt user_info;
+
+        sock = socket (AF_INET, SOCK_DGRAM, 0);
+        if (sock < 0)
+        {
+            gtk_text_buffer_insert_at_cursor (text_buffer,
+                                              "[drcom]: create sock failed.\n",
+                                              strlen ("[drcom]: create sock failed.\n"));
+            fprintf (stdout, "[drcom]: create sock failed.\n");
+            //exit (EXIT_FAILURE);
+        }
+        serv_addr.sin_family = AF_INET;
+        serv_addr.sin_addr.s_addr = inet_addr(SERVER_ADDR);
+        serv_addr.sin_port = htons(SERVER_PORT);
+
+        // get user information
+        get_user_info (&user_info, username, password);
+
+        // challenge data length 20
+        challenge (sock, serv_addr,
+                   send_data, 20, recv_data, RECV_DATA_SIZE, text_buffer);
+
+        // login data length 338, salt length 4
+        set_login_data (&user_info,
+                        send_data, 338, (unsigned char *)(recv_data + 4), 4);
+        memset (recv_data, 0x00, RECV_DATA_SIZE);
+        login (sock, serv_addr,
+               send_data, 338, recv_data, RECV_DATA_SIZE, text_buffer);
+
+        keep_alive (sock, serv_addr,
+                    send_data, recv_data, RECV_DATA_SIZE, text_buffer);
     }
 }
 

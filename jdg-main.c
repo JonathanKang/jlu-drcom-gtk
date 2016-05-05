@@ -51,6 +51,12 @@ on_check_button_toggled (GtkWidget *check_button,
     {
         g_key_file_set_boolean (key_file,
                                 "config", "remember_password", FALSE);
+
+        if (g_key_file_has_key (key_file, "config", "username", NULL))
+        {
+            g_key_file_remove_key (key_file, "config", "username", NULL);
+            g_key_file_remove_key (key_file, "config", "password", NULL);
+        }
     }
 
     g_key_file_save_to_file (key_file, "jdg.ini", NULL);

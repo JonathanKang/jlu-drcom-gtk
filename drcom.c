@@ -44,9 +44,9 @@ get_user_info (struct user_info_pkt *user_info,
                const char *password)
 {
     user_info->username = username;
-    user_info->username_len = sizeof (username) - 1;
+    user_info->username_len = strlen (username);
     user_info->password = password;
-    user_info->password_len = sizeof (password) - 1;
+    user_info->password_len = strlen (password);
     user_info->hostname = host;
     user_info->hostname_len = host_len;
     user_info->os_name = os;

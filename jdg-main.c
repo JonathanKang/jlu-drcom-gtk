@@ -164,7 +164,7 @@ on_login_button_clicked (GtkWidget *button,
         gtk_revealer_set_reveal_child (GTK_REVEALER (revealer), TRUE);
         gtk_stack_set_visible_child_name (GTK_STACK (stack), "info");
 
-        //on_login (username, password);
+        /* login */
         int sock, ret;
         unsigned char send_data[SEND_DATA_SIZE];
         char recv_data[RECV_DATA_SIZE];

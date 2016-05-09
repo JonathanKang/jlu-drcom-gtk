@@ -286,7 +286,7 @@ main (int argc, char *argv[])
     /* GtkTextView to show output information */
     text_view = gtk_text_view_new ();
     gtk_text_view_set_editable (GTK_TEXT_VIEW (text_view), FALSE);
-    gtk_widget_set_size_request (text_view, -1, 400);
+    gtk_widget_set_size_request (text_view, -1, 200);
     gtk_widget_set_vexpand (text_view, TRUE);
     gtk_widget_set_visible (text_view, TRUE);
 

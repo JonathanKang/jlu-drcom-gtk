@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <netinet/in.h>
 
@@ -28,6 +29,9 @@
 
 // 必须修改，帐号密码和 mac 地址是绑定的
 static uint64_t mac = 0x000000000000; // echo 0x`ifconfig eth | egrep -io "([0-9a-f]{2}:){5}[0-9a-f]{2}" | tr -d ":"`
+static int random_num;
+static int alive_count = 0;
+static int alive_fail_count = 0;
 
 // 不一定要修改
 static char host[] = "drcom";
@@ -104,12 +108,7 @@ bool logout (int sock,
              int recv_len,
              GtkTextBuffer *text_buffer);
 void logout_signal (int signum);
-bool keep_alive (int sock,
-                 struct sockaddr_in serv_addr,
-                 unsigned char *send_data,
-                 char *recv_data,
-                 int recv_len,
-                 GtkTextBuffer *text_buffer);
+gboolean keep_alive (gpointer user_data);
 void on_login (const char *username,
                const char *password,
                GtkTextBuffer *text_buffer);

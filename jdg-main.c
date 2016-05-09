@@ -24,6 +24,9 @@
 
 #include "drcom.h"
 
+static int sock;
+static guint source_id;
+
 static void
 on_destroy (GtkWidget *widget,
             gpointer user_data)
@@ -31,6 +34,12 @@ on_destroy (GtkWidget *widget,
     GPtrArray *array = (GPtrArray *) user_data;
 
     g_ptr_array_free (array, FALSE);
+
+    if (source_id)
+    {
+        g_source_remove (source_id);
+        source_id = 0;
+    }
 
     gtk_main_quit ();
 }
@@ -165,7 +174,7 @@ on_login_button_clicked (GtkWidget *button,
         gtk_stack_set_visible_child_name (GTK_STACK (stack), "info");
 
         /* login */
-        int sock, ret;
+        int ret;
         unsigned char send_data[SEND_DATA_SIZE];
         char recv_data[RECV_DATA_SIZE];
         struct sockaddr_in serv_addr;
@@ -198,8 +207,10 @@ on_login_button_clicked (GtkWidget *button,
         login (sock, serv_addr,
                send_data, 338, recv_data, RECV_DATA_SIZE, text_buffer);
 
-        keep_alive (sock, serv_addr,
-                    send_data, recv_data, RECV_DATA_SIZE, text_buffer);
+        random_num = rand () % 0xFFFF;
+        keep_alive (&sock);
+        source_id = g_timeout_add_full (G_PRIORITY_DEFAULT, 5000,
+                                        keep_alive, &sock, NULL);
     }
 }
 

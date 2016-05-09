@@ -21,7 +21,6 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -34,6 +33,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <signal.h>
+
+#include <glib.h>
 
 #include "drcom.h"
 #include "md5.h"
@@ -490,95 +491,82 @@ logout_signal (int signum)
     logout_flag = 1;
 }
 
-bool
-keep_alive (int sock,
-            struct sockaddr_in serv_addr,
-            unsigned char *send_data,
-            char *recv_data,
-            int recv_len,
-            GtkTextBuffer *text_buffer)
+gboolean
+keep_alive (gpointer user_data)
 {
     // keep alive alive data length 42 or 40
     unsigned char tail[4];
     int tail_len = 4;
-    int random = rand () % 0xFFFF;
     int alive_data_len = 0;
-    int alive_count = 0;
-    int alive_fail_count = 0;
     int ret;
+    int sock;
+    struct sockaddr_in serv_addr;
+    unsigned char send_data[SEND_DATA_SIZE];
+    char recv_data[RECV_DATA_SIZE];
+
+    sock = *((int *)user_data);
+
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = inet_addr(SERVER_ADDR);
+    serv_addr.sin_port = htons(SERVER_PORT);
 
     memset (tail, 0x00, tail_len);
 
-    do
+alive:
+    if (alive_fail_count > ALIVE_TRY)
     {
-        if (alive_fail_count > ALIVE_TRY)
-        {
-            close (sock);
-            gtk_text_buffer_insert_at_cursor (text_buffer,
-                                              "[drcom-keep-alive]: couldn't connect to network, check please.\n",
-                                              strlen ("[drcom-keep-alive]: couldn't connect to network, check please.\n"));
-            fprintf (stdout,
-                     "[drcom-keep-alive]: couldn't connect to network, check please.\n");
+        close (sock);
+        fprintf (stdout,
+                 "[drcom-keep-alive]: couldn't connect to network, check please.\n");
 
-            return false;
-        }
+        return G_SOURCE_REMOVE;
+    }
 
-        alive_data_len = alive_count > 0 ? 40 : 42;
-        set_alive_data (send_data,
-                        alive_data_len, tail, tail_len, alive_count, random);
+    alive_data_len = alive_count > 0 ? 40 : 42;
+    set_alive_data (send_data,
+                    alive_data_len, tail, tail_len, alive_count, random_num);
 
-        ret = sendto (sock,
-                      send_data, alive_data_len, 0,
-                      (struct sockaddr *)&serv_addr, sizeof (serv_addr));
-        if (ret != alive_data_len)
-        {
-            alive_fail_count++;
+    ret = sendto (sock,
+                  send_data, alive_data_len, 0,
+                  (struct sockaddr *)&serv_addr, sizeof (serv_addr));
+    if (ret != alive_data_len)
+    {
+        alive_fail_count++;
 
-            gtk_text_buffer_insert_at_cursor (text_buffer,
-                                              "[drcom-keep-alive]: send keep-alive data failed.\n",
-                                              strlen ("[drcom-keep-alive]: send keep-alive data failed.\n"));
-            fprintf (stdout,
-                     "[drcom-keep-alive]: send keep-alive data failed.\n");
+        fprintf (stdout,
+                 "[drcom-keep-alive]: send keep-alive data failed.\n");
 
-            continue;
-        }
-        else
-        {
-            alive_fail_count = 0;
-        }
+        goto alive;
+    }
+    else
+    {
+        alive_fail_count = 0;
+    }
 
-        memset (recv_data, 0x00, RECV_DATA_SIZE);
+    memset (recv_data, 0x00, RECV_DATA_SIZE);
 
-        ret = recvfrom (sock, recv_data, recv_len, 0, NULL, NULL);
-        if (ret < 0 || *recv_data != 0x07)
-        {
-            alive_fail_count++;
+    ret = recvfrom (sock, recv_data, RECV_DATA_SIZE, 0, NULL, NULL);
+    if (ret < 0 || *recv_data != 0x07)
+    {
+        alive_fail_count++;
 
-            gtk_text_buffer_insert_at_cursor (text_buffer,
-                                              "[drcom-keep-alive]: recieve keep-alive response data from server failed.\n",
-                                              strlen ("[drcom-keep-alive]: recieve keep-alive response data from server failed.\n"));
-            fprintf (stdout,
-                     "[drcom-keep-alive]: recieve keep-alive response data from server failed.\n");
+        fprintf (stdout,
+                 "[drcom-keep-alive]: recieve keep-alive response data from server failed.\n");
 
-            continue;
-        }
-        else
-        {
-            alive_fail_count = 0;
-        }
+        goto alive;
+    }
+    else
+    {
+        alive_fail_count = 0;
+    }
 
-        if (alive_count > 1)
-        {
-            memcpy (tail, recv_data+16, tail_len);
-        }
+    if (alive_count > 1)
+    {
+        memcpy (tail, recv_data+16, tail_len);
+    }
 
-        sleep (15);
-        gtk_text_buffer_insert_at_cursor (text_buffer,
-                                          "[drcom-keep-alive]: keep alive.\n",
-                                          strlen ("[drcom-keep-alive]: keep alive.\n"));
-        fprintf (stdout, "[drcom-keep-alive]: keep alive.\n");
-        alive_count = (alive_count + 1) % 3;
-    } while (logout_flag != 1);
+    fprintf (stdout, "[drcom-keep-alive]: keep alive.\n");
+    alive_count = (alive_count + 1) % 3;
 
-    return true;
+    return G_SOURCE_CONTINUE;
 }

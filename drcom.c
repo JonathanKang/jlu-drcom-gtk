@@ -73,8 +73,8 @@ set_challenge_data (unsigned char *clg_data,
     /* two byte of challenge_data */
     clg_data[data_index++] = (unsigned char)(random % 0xFFFF);
     clg_data[data_index++] = (unsigned char)((random % 0xFFFF) >> 8);
-    /* end with 0x09 */
-    clg_data[data_index++] = 0x09;
+    /* end with 0x0a */
+    clg_data[data_index++] = 0x0a;
 }
 
 bool

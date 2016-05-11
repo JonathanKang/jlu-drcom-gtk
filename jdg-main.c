@@ -240,6 +240,13 @@ on_logout_button_clicked (GtkWidget *button,
         password = gtk_entry_buffer_get_text (password_buffer);
         gtk_entry_buffer_delete_text (password_buffer, 0, sizeof (password));
     }
+
+    /* stop keep_alive */
+    if (source_id)
+    {
+        g_source_remove (source_id);
+        source_id = 0;
+    }
 }
 
 int

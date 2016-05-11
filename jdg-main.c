@@ -238,7 +238,7 @@ on_logout_button_clicked (GtkWidget *button,
         const gchar *password;
 
         password = gtk_entry_buffer_get_text (password_buffer);
-        gtk_entry_buffer_delete_text (password_buffer, 0, sizeof (password));
+        gtk_entry_buffer_delete_text (password_buffer, 0, strlen (password));
     }
 
     /* stop keep_alive */

@@ -209,7 +209,7 @@ on_login_button_clicked (GtkWidget *button,
 
         random_num = rand () % 0xFFFF;
         keep_alive (&sock);
-        source_id = g_timeout_add_full (G_PRIORITY_DEFAULT, 5000,
+        source_id = g_timeout_add_full (G_PRIORITY_DEFAULT, 15000,
                                         keep_alive, &sock, NULL);
     }
 }
